@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lavevars Lodge · Kasama</title>
+<link rel="icon" type="image/jpeg" href="LadyB%20logo.jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Source+Sans+3:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+:root{--forest:#0A3032;--forest-2:#0F4547;--forest-3:#17696B;--brass:#C58A0B;--brass-l:#FCE9B4;--bg:#E6EEEC;--surface:#fff;--ink:#050B0B;--muted:#27383A;--line:#A9BDBA;--ok:#0B6B3A;--ok-l:#CDEFD9;--warn:#9A4A00;--warn-l:#FFE2B8;--bad:#A3160B;--bad-l:#FBD3CE;--wa:#25D366;--r:10px;--sh:0 1px 2px rgba(15,61,62,.06),0 4px 14px rgba(15,61,62,.05)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',system-ui,sans-serif;font-size:17px;font-weight:500;line-height:1.5;-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+h1,h2,h3,.stat-value,.card-title,.btn-add,.login-btn{font-family:'Bricolage Grotesque','Source Sans 3',sans-serif}
+button,input,select{font-family:inherit}
+:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.hidden{display:none!important}
+
+/* Login */
+.login-screen{position:fixed;inset:0;z-index:1000;display:flex;background:var(--forest)}
+.login-art{flex:1.1;padding:64px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff;background:linear-gradient(160deg,var(--forest-3),var(--forest) 60%)}
+.login-art h1{font-size:56px;line-height:1.05;letter-spacing:-1.5px;max-width:440px}
+.login-art p{margin-top:16px;color:#EAF4F3;font-weight:600;font-size:18px;max-width:380px}
+.login-art .rule{width:56px;height:4px;background:var(--brass);margin-bottom:24px;border-radius:2px}
+.login-pane{flex:1;display:flex;align-items:center;justify-content:center;background:var(--surface);padding:32px}
+.login-box{width:100%;max-width:380px}
+.login-box img{width:72px;height:72px;border-radius:14px;object-fit:contain;border:1px solid var(--line);padding:6px;margin-bottom:20px}
+.login-box h2{font-size:28px;letter-spacing:-.5px}
+.login-box>p{color:var(--muted);font-weight:600;margin:4px 0 24px}
+.lg{margin-bottom:16px}
+.lg label{display:block;font-weight:800;font-size:16px;margin-bottom:6px}
+.lg input{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:var(--r);font-size:17px;font-weight:600;color:var(--ink);background:#fff}
+.lg input:focus{border-color:var(--forest);outline:none;box-shadow:0 0 0 3px rgba(15,61,62,.12)}
+.login-btn{width:100%;padding:14px;border:0;border-radius:var(--r);background:var(--brass);color:#fff;font-size:17px;font-weight:700;cursor:pointer}
+.login-btn:hover{background:#A66F00}
+#loginError{color:var(--bad);font-weight:700;margin-top:12px;min-height:22px}
+.login-roles{display:flex;gap:8px;margin-top:20px;padding:4px;background:var(--bg);border-radius:var(--r)}
+.role-btn{flex:1;padding:10px;border:0;border-radius:8px;background:transparent;font-weight:700;color:#1F2E2F;cursor:pointer;display:flex;gap:8px;align-items:center;justify-content:center}
+.role-btn.active{background:var(--forest);color:#fff;box-shadow:var(--sh)}
+
+/* Sidebar */
+.sidebar{width:252px;background:var(--forest);padding:24px 16px;position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;z-index:100}
+.brand{display:flex;gap:12px;align-items:center;padding:0 8px 24px;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,.12);color:#fff}
+.brand-logo{width:44px;height:44px;border-radius:10px;background:#fff;overflow:hidden;display:flex}
+.brand-logo img{width:100%;height:100%;object-fit:contain}
+.brand h1{font-size:21px;letter-spacing:-.3px}
+.brand p{font-size:14px;font-weight:600;color:#D6E8E6}
+.nav-menu{display:flex;flex-direction:column;gap:4px}
+.nav-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border:0;border-radius:var(--r);background:transparent;color:#EAF4F3;font-size:16px;font-weight:700;cursor:pointer;text-align:left;width:100%;border-left:3px solid transparent}
+.nav-item i{width:20px;text-align:center}
+.nav-item:hover{background:var(--forest-2);color:#fff}
+.nav-item.active{background:var(--brass);color:#fff;border-left-color:#fff}
+.nav-item.out{margin-top:auto;color:#FFB4AB}
+
+/* Layout */
+.main-content{flex:1;margin-left:252px;min-width:0}
+.topbar{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:3px solid var(--brass);padding:16px 36px;display:flex;justify-content:space-between;align-items:center}
+.topbar h2{font-size:26px;font-weight:800;letter-spacing:-.4px;color:var(--forest)}
+.user-profile{display:flex;gap:12px;align-items:center;text-align:right}
+.user-profile h4{font-size:17px;font-weight:800;line-height:1.2}
+.user-profile p{font-size:14px;font-weight:700;color:var(--muted)}
+.avatar-profile{width:42px;height:42px;border-radius:50%;background:var(--brass);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}
+.dashboard-content{padding:28px 36px}
+.view{display:none}.view.active{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:24px}
+.stat-card{background:var(--forest);color:#fff;border-radius:var(--r);padding:22px;box-shadow:var(--sh)}
+.stat-card:nth-child(2){background:#A66F00}
+.stat-card:nth-child(3){background:var(--ok)}
+.stat-value{font-size:38px;font-weight:800;letter-spacing:-1px;line-height:1.1}
+.stat-meta{margin-top:10px;display:flex;gap:10px;align-items:center}
+.stat-label{color:#fff;font-weight:700;opacity:.95}
+.pill{font-size:13px;font-weight:800;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.25);color:#fff}
+.pill.down{background:#fff;color:var(--bad)}
+.layout-grid{display:grid;grid-template-columns:2fr 1fr;gap:24px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--forest-3);border-radius:var(--r);padding:24px;box-shadow:var(--sh);margin-bottom:24px}
+.card-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.card-title{font-size:21px;font-weight:800;letter-spacing:-.3px;color:var(--forest)}
+.chip{font-size:14px;font-weight:800;padding:5px 14px;border-radius:20px;background:var(--brass);color:#fff}
+
+/* Tables */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:12px 14px;font-size:14px;color:#fff;background:var(--forest);font-weight:800;white-space:nowrap}
+th:first-child{border-radius:8px 0 0 8px}th:last-child{border-radius:0 8px 8px 0}
+td{padding:14px;border-bottom:1px solid var(--line);font-weight:700;color:var(--ink)}
+tbody tr:hover{background:#EAF3F1}
+tr:last-child td{border-bottom:0}
+th:first-child,td:first-child{padding-left:14px}
+.guest-cell{display:flex;gap:12px;align-items:center}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;flex:none}
+.a0{background:#1E6061}.a1{background:#B8892B}.a2{background:#7C4A8B}.a3{background:#B4475A}.a4{background:#2F6DB5}.a5{background:#5E7D2E}
+.sub{font-size:14px;color:var(--muted);font-weight:600}
+.tag{background:var(--forest);color:#fff;padding:3px 10px;border-radius:6px;font-size:14px;font-weight:800}
+.status-badge{font-size:13px;font-weight:800;padding:4px 12px;border-radius:20px;white-space:nowrap}
+.status-active{background:var(--ok-l);color:var(--ok)}
+.status-inactive{background:#D5DEDC;color:#1F2E2F}
+.status-occ{background:var(--warn-l);color:var(--warn)}
+.btn-icon{border:0;background:transparent;color:#1F2E2F;font-size:16px;width:34px;height:34px;border-radius:8px;cursor:pointer}
+.btn-icon:hover{background:var(--bad-l);color:var(--bad)}
+.btn-icon.save:hover{background:var(--ok-l);color:var(--ok)}
+
+/* Rooms */
+.rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:12px;max-height:480px;overflow-y:auto}
+.room-item{background:#F1FAF4;border:1px solid var(--line);border-left:6px solid var(--ok);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:6px}
+.room-item.occupied{border-left-color:var(--warn);background:#FFF5E6}
+.room-num{font-family:'Bricolage Grotesque',sans-serif;font-size:21px;font-weight:800;color:var(--ink)}
+.room-guest{font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.room-price{font-size:15px;font-weight:800;color:var(--forest)}
+.room-status{font-size:13px;font-weight:800;text-align:center;padding:4px;border-radius:6px;background:var(--ok);color:#fff}
+.occupied .room-status{background:var(--warn);color:#fff}
+
+/* Forms */
+.add-guest-form{display:flex;flex-direction:column;gap:16px}
+.form-row{display:flex;gap:16px}
+.form-group{flex:1;min-width:0}
+.form-group label{display:block;font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px}
+.input-wrap{position:relative}
+.input-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--forest-3);font-size:14px;pointer-events:none}
+.form-group input,.form-group select,.toolbar select,.price-input{width:100%;padding:12px 14px 12px 40px;border:2px solid var(--line);border-radius:var(--r);font-size:17px;font-weight:700;background:#fff;color:var(--ink)}
+::placeholder{color:#5A6B6C;font-weight:500;opacity:1}
+.form-group input:focus,.form-group select:focus,.price-input:focus{border-color:var(--forest);outline:none;box-shadow:0 0 0 3px rgba(15,61,62,.12)}
+.form-group input[readonly]{background:#DDE9E6;color:var(--forest)}
+.btn-add{padding:14px;border:0;border-radius:var(--r);background:var(--brass);color:#fff;font-size:17px;font-weight:700;cursor:pointer;display:flex;gap:8px;align-items:center;justify-content:center}
+.btn-add:hover{background:#A66F00}
+.action-btn{display:flex;gap:14px;align-items:center;width:100%;padding:14px;margin-bottom:12px;border:1px solid var(--line);border-radius:var(--r);background:#fff;cursor:pointer;text-align:left}
+.action-btn:hover{border-color:var(--forest)}
+.action-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;flex:none}
+.bg-red{background:var(--bad)}.bg-blue{background:var(--forest)}
+.action-text{font-weight:800}.action-text small{display:block;font-weight:600;color:var(--muted);font-size:14px}
+.btn-print,.btn-print-wa{padding:10px 16px;border-radius:8px;font-weight:700;font-size:15px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.btn-print{background:#fff;border:2px solid var(--forest);color:var(--forest)}
+.btn-print:hover{background:var(--forest);color:#fff}
+.btn-print-wa{background:var(--wa);border:1.5px solid var(--wa);color:#fff}
+.btn-receipt{border:0;border-radius:6px;padding:6px 10px;font-weight:800;font-size:13px;color:#fff;cursor:pointer}
+.btn-receipt-wa{background:#128C3E}.btn-receipt-email{background:var(--forest)}
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.toolbar select{width:auto;padding:9px 14px}
+.price-input{width:120px;padding:8px 10px}
+.admin-only{display:none}
+body.is-admin .admin-only{display:revert}
+body.is-admin th.admin-only,body.is-admin td.admin-only{display:table-cell}
+.empty{text-align:center;padding:28px;color:var(--muted);font-weight:700}
+
+#toast{position:fixed;bottom:28px;right:28px;z-index:999;padding:14px 22px;border-radius:var(--r);background:var(--ink);color:#fff;font-weight:700;transform:translateY(200%);transition:transform .25s;display:flex;gap:10px;align-items:center}
+#toast.show{transform:none}
+#toast.success{background:var(--ok)}#toast.error{background:var(--bad)}
+.loading-overlay{position:fixed;inset:0;z-index:998;background:rgba(242,245,244,.8);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--forest)}
+
+@media(max-width:1024px){.layout-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr 1fr}.login-art{display:none}}
+@media(max-width:768px){.sidebar{position:static;width:100%;flex-direction:row;overflow-x:auto;padding:10px}.brand,.nav-item.out{display:none}.nav-menu{flex-direction:row}.nav-item{white-space:nowrap;width:auto}body{flex-direction:column}.main-content{margin-left:0}.topbar,.dashboard-content{padding:16px}.stats-grid{grid-template-columns:1fr}.form-row{flex-direction:column;gap:12px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-art">
+    <div class="rule"></div>
+    <h1>Lavevars Lodge</h1>
+    <p>Check-ins, rooms, prices and daily takings for Kasama, in one place.</p>
+  </div>
+  <div class="login-pane"><div class="login-box">
+    <img src="LadyB%20logo.jpeg" alt="Lavevars Lodge logo">
+    <h2>Welcome back</h2>
+    <p id="loginSubtitle">Sign in to the staff portal</p>
+    <div class="lg" id="usernameGroup"><label for="loginUser">Username</label><input type="text" id="loginUser" placeholder="Enter username" autocomplete="username"></div>
+    <div class="lg"><label id="passwordLabel" for="loginPass">Password</label><input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password"></div>
+    <button class="login-btn" onclick="doLogin()">Sign in</button>
+    <div id="loginError" role="alert"></div>
+    <div class="login-roles">
+      <button class="role-btn active" id="btnRoleStaff" onclick="setLoginRole('staff')"><i class="fas fa-concierge-bell"></i> Staff</button>
+      <button class="role-btn" id="btnRoleAdmin" onclick="setLoginRole('admin')"><i class="fas fa-user-shield"></i> Admin</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="brand">
+    <div class="brand-logo"><img src="LadyB%20logo.jpeg" alt=""></div>
+    <div><h1>Lavevars</h1><p>Kasama Lodge</p></div>
+  </div>
+  <div class="nav-menu">
+    <button class="nav-item active" onclick="switchView('dashboard',this)"><i class="fas fa-border-all"></i> Dashboard</button>
+    <button class="nav-item" onclick="switchView('rooms',this)"><i class="fas fa-bed"></i> All Rooms</button>
+    <button class="nav-item" onclick="switchView('prices',this)"><i class="fas fa-tags"></i> Rooms &amp; Prices</button>
+    <button class="nav-item" onclick="switchView('guests',this)"><i class="fas fa-users"></i> Guest History</button>
+    <button class="nav-item" onclick="switchView('billing',this)"><i class="fas fa-file-invoice-dollar"></i> Billing</button>
+    <button class="nav-item admin-only" onclick="switchView('admin',this)"><i class="fas fa-cog"></i> Admin Settings</button>
+    <button class="nav-item out" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Log out</button>
+  </div>
+</nav>
+
+<div class="main-content">
+  <header class="topbar">
+    <h2 id="pageTitle">Dashboard</h2>
+    <div class="user-profile">
+      <div><h4 id="currentUserName">Receptionist</h4><p id="currentUserRole">Staff</p></div>
+      <div class="avatar-profile" id="currentUserInitials">S</div>
+    </div>
+  </header>
+
+  <main class="dashboard-content">
+
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="view active">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="layout-grid">
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Active guests</div><div class="chip" id="guestCountBadge">0 active</div></div>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Guest</th><th>Room</th><th>Check-in</th><th>Status</th><th>Amount</th><th></th></tr></thead>
+              <tbody id="guestTableBody"></tbody>
+            </table></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">New check-in</div></div>
+            <div class="add-guest-form">
+              <div class="form-row">
+                <div class="form-group"><label for="guestNameInput">Guest name</label><div class="input-wrap"><i class="fas fa-user"></i><input type="text" id="guestNameInput" placeholder="e.g. Chanda Mwila"></div></div>
+                <div class="form-group"><label for="guestPhoneInput">WhatsApp number</label><div class="input-wrap"><i class="fas fa-phone"></i><input type="tel" id="guestPhoneInput" placeholder="e.g. 0977123456"></div></div>
+                <div class="form-group"><label for="guestEmailInput">Email address</label><div class="input-wrap"><i class="fas fa-envelope"></i><input type="email" id="guestEmailInput" placeholder="guest@gmail.com"></div></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="guestOriginInput">Coming from</label><div class="input-wrap"><i class="fas fa-map-marker-alt"></i><input type="text" id="guestOriginInput" placeholder="e.g. Lusaka"></div></div>
+                <div class="form-group"><label for="roomSelect">Room number and price</label><div class="input-wrap"><i class="fas fa-door-closed"></i><select id="roomSelect" onchange="updateRateFromRoom()"></select></div></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="checkInDate">Check-in date</label><div class="input-wrap"><i class="fas fa-calendar"></i><input type="date" id="checkInDate"></div></div>
+                <div class="form-group"><label for="daysInput">Number of nights</label><div class="input-wrap"><i class="fas fa-clock"></i><input type="number" id="daysInput" min="1" value="1" oninput="calculateTotal()"></div></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="rateInput">Rate per night (ZMW)</label><div class="input-wrap"><i class="fas fa-tag"></i><input type="number" id="rateInput" value="500" readonly></div></div>
+                <div class="form-group"><label for="totalAmountInput">Total to pay (ZMW)</label><div class="input-wrap"><i class="fas fa-money-bill-wave"></i><input type="number" id="totalAmountInput" value="500" readonly></div></div>
+              </div>
+              <button class="btn-add" id="addGuestBtn"><i class="fas fa-check-circle"></i> Confirm check-in</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Room status</div><div class="chip" id="roomSummaryBadge">0 vacant</div></div>
+            <div class="rooms-grid" id="roomsGrid"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Quick actions</div></div>
+            <button class="action-btn" onclick="markAllCheckedOut()"><span class="action-icon bg-red"><i class="fas fa-right-from-bracket"></i></span><span class="action-text">Check out all guests<small>Free every occupied room</small></span></button>
+            <button class="action-btn" onclick="loadAll()"><span class="action-icon bg-blue"><i class="fas fa-arrows-rotate"></i></span><span class="action-text">Refresh data<small>Load the latest records</small></span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ALL ROOMS -->
+    <section id="view-rooms" class="view">
+      <div class="card">
+        <div class="card-header"><div class="card-title">All lodge rooms</div><div class="chip" id="allRoomsSummaryBadge">0 vacant / 0 total</div></div>
+        <div class="rooms-grid" id="allRoomsGrid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));max-height:none"></div>
+      </div>
+    </section>
+
+    <!-- ROOMS & PRICES -->
+    <section id="view-prices" class="view">
+      <div class="card admin-only">
+        <div class="card-header"><div class="card-title">Add a room</div></div>
+        <div class="form-row" style="align-items:flex-end;flex-wrap:wrap">
+          <div class="form-group"><label for="newRoomName">Room number</label><div class="input-wrap"><i class="fas fa-door-closed"></i><input type="text" id="newRoomName" placeholder="e.g. Room 109"></div></div>
+          <div class="form-group"><label for="newRoomCap">Sleeps</label><div class="input-wrap"><i class="fas fa-user-group"></i><input type="number" id="newRoomCap" min="1" value="2"></div></div>
+          <div class="form-group"><label for="newRoomPrice">Price per night (ZMW)</label><div class="input-wrap"><i class="fas fa-tag"></i><input type="number" id="newRoomPrice" placeholder="e.g. 500"></div></div>
+          <button class="btn-add" style="padding:12px 22px" onclick="addRoom()"><i class="fas fa-plus"></i> Add room</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Room numbers and prices</div>
+          <div class="toolbar">
+            <select id="priceFilter" onchange="renderPrices()" aria-label="Filter by status"><option value="all">All rooms</option><option value="vacant">Vacant only</option><option value="occupied">Occupied only</option></select>
+            <select id="priceSort" onchange="renderPrices()" aria-label="Sort rooms"><option value="num">Sort by room number</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select>
+          </div>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Room number</th><th>Sleeps</th><th>Price per night</th><th>Status</th><th class="admin-only">Actions</th></tr></thead>
+          <tbody id="pricesTableBody"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- GUESTS -->
+    <section id="view-guests" class="view">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Guest history</div><div class="chip">All records</div></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Guest</th><th>Coming from</th><th>Room</th><th>Check-in</th><th>Nights</th><th>Check-out</th><th>Status</th><th>Amount</th></tr></thead>
+          <tbody id="allGuestsTableBody"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- BILLING -->
+    <section id="view-billing" class="view">
+      <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+        <button type="button" class="btn-print" onclick="printReport()"><i class="fas fa-print"></i> Print report</button>
+        <button type="button" class="btn-print-wa" onclick="shareToWhatsApp()"><i class="fab fa-whatsapp"></i> Send report to WhatsApp</button>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="stat-card"><div class="stat-value" id="billTotalRevenue">ZMW 0</div><div class="stat-meta"><span class="stat-label">Total revenue, all time</span></div></div>
+        <div class="stat-card"><div class="stat-value" id="billTodayRevenue">ZMW 0</div><div class="stat-meta"><span class="stat-label">Collected today</span></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Recent transactions</div><div class="chip">Latest 20</div></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Date</th><th>Guest</th><th>Origin</th><th>Room</th><th>Nights</th><th>Status</th><th>Amount</th><th>Receipt</th></tr></thead>
+          <tbody id="billingTableBody"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ADMIN -->
+    <section id="view-admin" class="view">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Add staff account</div></div>
+        <div class="add-guest-form">
+          <div class="form-row">
+            <div class="form-group"><label for="newStaffName">Full name</label><div class="input-wrap"><i class="fas fa-user"></i><input type="text" id="newStaffName" placeholder="e.g. John Banda"></div></div>
+            <div class="form-group"><label for="newStaffUser">Username</label><div class="input-wrap"><i class="fas fa-user-tag"></i><input type="text" id="newStaffUser" placeholder="e.g. john123"></div></div>
+            <div class="form-group"><label for="newStaffPass">Password</label><div class="input-wrap"><i class="fas fa-lock"></i><input type="password" id="newStaffPass" placeholder="Enter password"></div></div>
+          </div>
+          <button class="btn-add" onclick="addStaff()"><i class="fas fa-plus-circle"></i> Create staff account</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Staff login record</div></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Staff name</th><th>Date and time</th></tr></thead>
+          <tbody id="staffLogTableBody"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast" role="status"></div>
+<div id="loading" class="loading-overlay hidden"><i class="fas fa-spinner fa-spin"></i></div>
+
+<script>
+const SUPABASE_URL='https://vokfonpslvruqrrrzjzh.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZva2ZvbnBzbHZydXFycnJ6anpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzNTI3MTEsImV4cCI6MjEwNTkyODcxMX0.aoXjKuUYPzduqxoj54fvUANF7yZ1zqS9wq1eKtXnRVw';
+let supabase=null,rooms=[],guests=[],currentUser=null,loginRole='staff';
+const $=id=>document.getElementById(id);
+const zmw=n=>'ZMW '+(Number(n)||0).toLocaleString();
+const sha=async t=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))).map(b=>b.toString(16).padStart(2,'0')).join('');
+
+function showToast(msg,type='success',ms=3000){const el=$('toast');el.innerHTML=`<i class="fas fa-${type==='success'?'check-circle':'circle-exclamation'}"></i> ${escapeHtml(msg)}`;el.className='show '+type;setTimeout(()=>el.className='',ms)}
+function setLoading(on){$('loading').classList.toggle('hidden',!on)}
+function formatDate(d){if(!d)return'';d=new Date(d);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function today(){return formatDate(new Date())}
+function escapeHtml(t){if(t==null)return'';const d=document.createElement('div');d.textContent=String(t);return d.innerHTML}
+function initials(n){if(!n)return'?';const p=n.trim().split(/\s+/);return(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase()}
+function colorFor(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%6;return'a'+h}
+const roomName=id=>{const r=rooms.find(x=>x.id===id);return r?r.name:'—'};
+const numKey=n=>parseInt((n.match(/\d+/)||[0])[0],10);
+
+// Login
+window.setLoginRole=function(role){
+  loginRole=role;$('loginError').textContent='';
+  const a=role==='admin';
+  $('btnRoleStaff').classList.toggle('active',!a);$('btnRoleAdmin').classList.toggle('active',a);
+  $('usernameGroup').style.display=a?'none':'block';
+  $('loginSubtitle').textContent=a?'Administrator sign in':'Sign in to the staff portal';
+  $('passwordLabel').textContent=a?'Admin password':'Password';
+  $('loginUser').value=a?'admin':'';
+};
+window.doLogin=async function(){
+  const user=$('loginUser').value.trim(),pass=$('loginPass').value.trim(),err=$('loginError');
+  err.textContent='';
+  if(!pass){err.textContent='Enter your password.';return}
+  if(loginRole==='staff'&&!user){err.textContent='Enter your username.';return}
+  setLoading(true);
+  try{
+    const hash=await sha(pass);
+    if(loginRole==='admin'){
+      const{data,error}=await supabase.from('admin').select('password_hash').limit(1).maybeSingle();
+      if(error)throw error;
+      if(!data||data.password_hash!==hash){err.textContent='Wrong admin password.';return}
+      currentUser={name:'Admin',role:'Admin'};
+    }else{
+      const{data,error}=await supabase.from('staff').select('*').eq('username',user).maybeSingle();
+      if(error)throw error;
+      if(!data){err.textContent='Username not found.';return}
+      if(data.password_hash!==hash){err.textContent='Wrong password.';return}
+      currentUser={name:data.name,role:'Staff',id:data.id};
+    }
+    $('loginScreen').classList.add('hidden');
+    $('currentUserName').textContent=currentUser.name;
+    $('currentUserRole').textContent=currentUser.role;
+    $('currentUserInitials').textContent=currentUser.name[0].toUpperCase();
+    document.body.classList.toggle('is-admin',currentUser.role==='Admin');
+    if(currentUser.role!=='Admin')await supabase.from('login_logs').insert({staff_id:currentUser.id,staff_name:currentUser.name});
+    loadAll();showToast('Signed in');
+  }catch(e){err.textContent='Database error: '+e.message}
+  finally{setLoading(false)}
+};
+window.doLogout=function(){
+  currentUser=null;document.body.classList.remove('is-admin');
+  $('loginScreen').classList.remove('hidden');$('loginPass').value='';
+  setLoginRole('staff');
+  switchView('dashboard',document.querySelector('.nav-item'));
+};
+
+// Navigation
+window.switchView=function(v,btn){
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$('view-'+v).classList.add('active');
+  $('pageTitle').textContent={dashboard:'Dashboard',rooms:'All Rooms',prices:'Rooms & Prices',guests:'Guest History',billing:'Billing & Finance',admin:'Admin Settings'}[v];
+  if(v==='admin')loadAdminData();
+};
+
+// Rate calc
+window.updateRateFromRoom=function(){
+  const r=rooms.find(x=>x.id===Number($('roomSelect').value));
+  $('rateInput').value=r&&r.price?r.price:500;calculateTotal();
+};
+window.calculateTotal=function(){
+  $('totalAmountInput').value=(parseFloat($('daysInput').value)||1)*(parseFloat($('rateInput').value)||0);
+};
+
+// Data
+async function loadAll(){
+  if(!supabase)return;setLoading(true);
+  try{
+    const[r,g]=await Promise.all([
+      supabase.from('rooms').select('*').order('id'),
+      supabase.from('guests').select('*').order('created_at',{ascending:false})
+    ]);
+    if(r.error)throw r.error;if(g.error)throw g.error;
+    rooms=r.data||[];guests=g.data||[];
+    if(!rooms.length){
+      const seed=[];
+      for(let i=101;i<=116;i++)seed.push({name:'Room '+i,price:500,capacity:2,is_occupied:false});
+      for(let i=201;i<=216;i++)seed.push({name:'Room '+i,price:850,capacity:3,is_occupied:false});
+      for(let i=301;i<=308;i++)seed.push({name:'Room '+i,price:1200,capacity:4,is_occupied:false});
+      await supabase.from('rooms').insert(seed);
+      rooms=(await supabase.from('rooms').select('*').order('id')).data||[];
+    }
+    renderAll();
+  }catch(e){console.error(e);showToast('Could not load: '+e.message,'error',6000)}
+  finally{setLoading(false)}
+}
+async function loadAdminData(){
+  if(!currentUser||currentUser.role!=='Admin')return;
+  const{data,error}=await supabase.from('login_logs').select('*').order('login_time',{ascending:false}).limit(50);
+  if(error)return;
+  $('staffLogTableBody').innerHTML=data.length?data.map(l=>`<tr><td>${escapeHtml(l.staff_name)}</td><td>${new Date(l.login_time).toLocaleString()}</td></tr>`).join(''):'<tr><td colspan="2" class="empty">No logins recorded yet.</td></tr>';
+}
+
+// Render
+function renderAll(){renderStats();renderDashboardTable();renderAllGuestsTable();renderDashboardRooms();renderAllRooms();renderRoomSelect();renderPrices();renderBilling();$('guestCountBadge').textContent=guests.filter(g=>g.still_lodging).length+' active'}
+function renderStats(){
+  const active=guests.filter(g=>g.still_lodging).length,total=guests.reduce((s,g)=>s+(Number(g.amount_paid)||0),0);
+  const vacant=rooms.filter(r=>!r.is_occupied).length,rate=rooms.length?Math.round((rooms.length-vacant)/rooms.length*100):0;
+  $('statsGrid').innerHTML=`
+  <div class="stat-card"><div class="stat-value">${zmw(total)}</div><div class="stat-meta"><span class="stat-label">Total revenue</span></div></div>
+  <div class="stat-card"><div class="stat-value">${active}</div><div class="stat-meta"><span class="stat-label">Guests in house</span></div></div>
+  <div class="stat-card"><div class="stat-value">${rate}%</div><div class="stat-meta"><span class="stat-label">Occupancy</span><span class="pill ${rate>50?'':'down'}">${vacant} vacant</span></div></div>`;
+}
+function renderDashboardTable(){
+  const a=guests.filter(g=>g.still_lodging);
+  $('guestTableBody').innerHTML=a.length?a.map(g=>`<tr>
+    <td><div class="guest-cell"><div class="avatar ${colorFor(g.name||'x')}">${initials(g.name)}</div><div>${escapeHtml(g.name)}<div class="sub">${escapeHtml(g.origin||'—')}</div></div></div></td>
+    <td><span class="tag">${escapeHtml(roomName(g.room_id))}</span></td><td>${g.check_in||'—'}</td>
+    <td><span class="status-badge status-active">Lodging</span></td><td>${zmw(g.amount_paid)}</td>
+    <td><button class="btn-icon" onclick="checkoutGuest('${g.id}')" title="Check out" aria-label="Check out"><i class="fas fa-arrow-right-from-bracket"></i></button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">No active guests.</td></tr>';
+}
+function renderAllGuestsTable(){
+  $('allGuestsTableBody').innerHTML=guests.length?guests.map(g=>`<tr>
+    <td><div class="guest-cell"><div class="avatar ${colorFor(g.name||'x')}">${initials(g.name)}</div>${escapeHtml(g.name)}</div></td>
+    <td>${escapeHtml(g.origin||'—')}</td><td><span class="tag">${escapeHtml(roomName(g.room_id))}</span></td>
+    <td>${g.check_in||'—'}</td><td>${g.days||1}</td><td>${g.check_out||'—'}</td>
+    <td><span class="status-badge ${g.still_lodging?'status-active':'status-inactive'}">${g.still_lodging?'Lodging':'Checked out'}</span></td>
+    <td>${zmw(g.amount_paid)}</td></tr>`).join(''):'<tr><td colspan="8" class="empty">No guest records yet.</td></tr>';
+}
+function roomCard(r,full){
+  const occ=r.is_occupied,o=occ?guests.find(g=>g.room_id===r.id&&g.still_lodging):null;
+  const who=o?escapeHtml(full?o.name:o.name.split(' ')[0]):'Available';
+  return `<div class="room-item ${occ?'occupied':''}"><span class="room-num">${escapeHtml(full?r.name:r.name.replace('Room ',''))}</span><span class="room-guest">${who}</span><span class="room-price">${zmw(r.price||500)}</span><span class="room-status">${occ?'Occupied':'Vacant'}</span></div>`;
+}
+function renderDashboardRooms(){
+  $('roomsGrid').innerHTML=rooms.length?rooms.map(r=>roomCard(r,false)).join(''):'<div class="empty">No rooms yet.</div>';
+  $('roomSummaryBadge').textContent=rooms.filter(r=>!r.is_occupied).length+' vacant';
+}
+function renderAllRooms(){
+  $('allRoomsGrid').innerHTML=rooms.map(r=>roomCard(r,true)).join('');
+  $('allRoomsSummaryBadge').textContent=`${rooms.filter(r=>!r.is_occupied).length} vacant / ${rooms.length} total`;
+}
+function renderRoomSelect(){
+  const s=$('roomSelect'),v=rooms.filter(r=>!r.is_occupied).sort((a,b)=>numKey(a.name)-numKey(b.name));
+  if(!v.length){s.innerHTML='<option value="">No rooms available</option>';s.disabled=true;return}
+  s.disabled=false;
+  s.innerHTML=v.map(r=>`<option value="${r.id}">${escapeHtml(r.name)} — ${zmw(r.price||500)}</option>`).join('');
+  updateRateFromRoom();
+}
+window.renderPrices=function(){
+  const f=$('priceFilter').value,s=$('priceSort').value;
+  let list=rooms.filter(r=>f==='all'||(f==='vacant'?!r.is_occupied:r.is_occupied));
+  list.sort((a,b)=>s==='low'?(a.price||0)-(b.price||0):s==='high'?(b.price||0)-(a.price||0):numKey(a.name)-numKey(b.name));
+  $('pricesTableBody').innerHTML=list.length?list.map(r=>`<tr>
+    <td><strong>${escapeHtml(r.name)}</strong></td><td>${r.capacity||2}</td>
+    <td><span class="admin-only"><input class="price-input" type="number" min="0" step="10" id="price-${r.id}" value="${r.price||500}" aria-label="Price for ${escapeHtml(r.name)}"></span><span class="view-only">${zmw(r.price||500)}</span></td>
+    <td><span class="status-badge ${r.is_occupied?'status-occ':'status-active'}">${r.is_occupied?'Occupied':'Vacant'}</span></td>
+    <td class="admin-only"><button class="btn-icon save" onclick="savePrice(${r.id})" title="Save price" aria-label="Save price"><i class="fas fa-floppy-disk"></i></button><button class="btn-icon" onclick="deleteRoom(${r.id})" title="Delete room" aria-label="Delete room"><i class="fas fa-trash"></i></button></td></tr>`).join(''):'<tr><td colspan="5" class="empty">No rooms match this filter.</td></tr>';
+  document.querySelectorAll('.view-only').forEach(e=>e.style.display=currentUser&&currentUser.role==='Admin'?'none':'inline');
+};
+function renderBilling(){
+  const total=guests.reduce((s,g)=>s+(Number(g.amount_paid)||0),0),t=today();
+  $('billTotalRevenue').textContent=zmw(total);
+  $('billTodayRevenue').textContent=zmw(guests.filter(g=>g.check_in===t).reduce((s,g)=>s+(Number(g.amount_paid)||0),0));
+  $('billingTableBody').innerHTML=guests.length?guests.slice(0,20).map(g=>`<tr>
+    <td>${g.check_in||'—'}</td><td>${escapeHtml(g.name)}</td><td>${escapeHtml(g.origin||'—')}</td>
+    <td><span class="tag">${escapeHtml(roomName(g.room_id))}</span></td><td>${g.days||1}</td>
+    <td><span class="status-badge ${g.still_lodging?'status-active':'status-inactive'}">${g.still_lodging?'Lodging':'Checked out'}</span></td>
+    <td style="color:var(--forest)">${zmw(g.amount_paid)}</td>
+    <td style="display:flex;gap:6px"><button class="btn-receipt btn-receipt-wa" onclick="sendReceiptWhatsApp('${g.id}')"><i class="fab fa-whatsapp"></i> WA</button><button class="btn-receipt btn-receipt-email" onclick="sendReceiptEmail('${g.id}')"><i class="fas fa-envelope"></i> Email</button></td></tr>`).join(''):'<tr><td colspan="8" class="empty">No transactions yet.</td></tr>';
+}
+
+// Room admin
+window.addRoom=async function(){
+  const name=$('newRoomName').value.trim(),price=parseFloat($('newRoomPrice').value),cap=parseInt($('newRoomCap').value)||2;
+  if(!name||isNaN(price)){showToast('Enter a room number and a price.','error');return}
+  if(rooms.some(r=>r.name.toLowerCase()===name.toLowerCase())){showToast('That room number already exists.','error');return}
+  setLoading(true);
+  try{
+    const{error}=await supabase.from('rooms').insert({name,price,capacity:cap,is_occupied:false});
+    if(error)throw error;
+    showToast('Room added');$('newRoomName').value='';$('newRoomPrice').value='';await loadAll();
+  }catch(e){showToast(e.message,'error')}finally{setLoading(false)}
+};
+window.savePrice=async function(id){
+  const price=parseFloat($('price-'+id).value);
+  if(isNaN(price)||price<0){showToast('Enter a valid price.','error');return}
+  setLoading(true);
+  try{
+    const{error}=await supabase.from('rooms').update({price}).eq('id',id);
+    if(error)throw error;
+    showToast('Price saved');await loadAll();
+  }catch(e){showToast(e.message,'error')}finally{setLoading(false)}
+};
+window.deleteRoom=async function(id){
+  if(!confirm('Delete this room? This cannot be undone.'))return;
+  setLoading(true);
+  try{
+    const{error}=await supabase.from('rooms').delete().eq('id',id);
+    if(error)throw error;
+    showToast('Room deleted');await loadAll();
+  }catch(e){showToast(e.message,'error')}finally{setLoading(false)}
+};
+window.addStaff=async function(){
+  const name=$('newStaffName').value.trim(),username=$('newStaffUser').value.trim(),password=$('newStaffPass').value.trim();
+  if(!name||!username||!password){showToast('Fill in all fields.','error');return}
+  setLoading(true);
+  try{
+    const{error}=await supabase.from('staff').insert({name,username,password_hash:await sha(password)});
+    if(error)throw error;
+    showToast('Staff account created');['newStaffName','newStaffUser','newStaffPass'].forEach(i=>$(i).value='');
+  }catch(e){showToast(e.message,'error')}finally{setLoading(false)}
+};
+
+// Receipts & reports
+function receiptText(g){return `*Lavevars Lodge - Receipt*\n\nGuest: ${g.name}\nRoom: ${roomName(g.room_id)}\nCheck-in: ${g.check_in}\nNights: ${g.days||1}\nTotal paid: ${zmw(g.amount_paid)}\n\nThank you for staying with us!`}
+window.sendReceiptWhatsApp=function(id){
+  const g=guests.find(x=>String(x.id)===String(id));if(!g)return;
+  let p=(g.phone||'').replace(/\D/g,'');if(p.startsWith('0')&&p.length===10)p='260'+p.slice(1);
+  window.open(`https://wa.me/${p}?text=${encodeURIComponent(receiptText(g))}`,'_blank');
+};
+window.sendReceiptEmail=function(id){
+  const g=guests.find(x=>String(x.id)===String(id));if(!g)return;
+  location.href=`mailto:${g.email||''}?subject=${encodeURIComponent('Receipt from Lavevars Lodge - '+g.name)}&body=${encodeURIComponent(receiptText(g).replace(/\*/g,''))}`;
+};
+function stats(){return{total:guests.reduce((s,g)=>s+(Number(g.amount_paid)||0),0),active:guests.filter(g=>g.still_lodging).length,vacant:rooms.filter(r=>!r.is_occupied).length}}
+window.printReport=function(){
+  const s=stats(),rows=guests.map(g=>`<tr><td>${escapeHtml(g.check_in)}</td><td>${escapeHtml(g.name)}</td><td>${escapeHtml(roomName(g.room_id))}</td><td>${g.days||1}</td><td>${zmw(g.amount_paid)}</td></tr>`).join('');
+  const f=document.createElement('iframe');f.style.cssText='position:fixed;width:0;height:0;right:0;bottom:0';document.body.appendChild(f);
+  const d=f.contentWindow.document;d.open();
+  d.write(`<html><head><title>Report - Lavevars Lodge</title><style>body{font-family:Arial,sans-serif;padding:40px}h1{text-align:center;border-bottom:3px solid #0F3D3E;padding-bottom:10px;color:#0F3D3E}.s{display:flex;justify-content:space-between;margin:24px 0;font-weight:bold}table{width:100%;border-collapse:collapse}th{background:#0F3D3E;color:#fff}th,td{border:1px solid #999;padding:9px;text-align:left}</style></head><body><h1>Lavevars Lodge - Management Report</h1><p style="text-align:center">Generated ${new Date().toLocaleString()}</p><div class="s"><div>Total revenue: ${zmw(s.total)}</div><div>Active guests: ${s.active}</div><div>Vacant rooms: ${s.vacant} / ${rooms.length}</div></div><table><thead><tr><th>Date</th><th>Guest</th><th>Room</th><th>Nights</th><th>Amount</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
+  d.close();setTimeout(()=>{f.contentWindow.print();setTimeout(()=>f.remove(),1000)},500);
+};
+window.shareToWhatsApp=function(){
+  const s=stats();
+  window.open('https://wa.me/?text='+encodeURIComponent(`*Lavevars Lodge - Management Report*\nDate: ${new Date().toLocaleDateString()}\n\n*Total revenue:* ${zmw(s.total)}\n*Active guests:* ${s.active}\n*Vacant rooms:* ${s.vacant} / ${rooms.length}`),'_blank');
+};
+
+// Actions
+window.addGuest=async function(){
+  const name=$('guestNameInput').value.trim(),roomId=$('roomSelect').value,checkIn=$('checkInDate').value;
+  if(!name)return showToast('Enter the guest name.','error');
+  if(!roomId)return showToast('Choose a vacant room.','error');
+  if(!checkIn)return showToast('Pick a check-in date.','error');
+  setLoading(true);
+  try{
+    const{error:e1}=await supabase.from('guests').insert({name,phone:$('guestPhoneInput').value.trim(),email:$('guestEmailInput').value.trim(),origin:$('guestOriginInput').value.trim(),room_id:Number(roomId),check_in:checkIn,days:parseInt($('daysInput').value)||1,amount_paid:parseFloat($('totalAmountInput').value)||0,still_lodging:true});
+    if(e1)throw e1;
+    const{error:e2}=await supabase.from('rooms').update({is_occupied:true}).eq('id',Number(roomId));
+    if(e2)throw e2;
+    ['guestNameInput','guestPhoneInput','guestEmailInput','guestOriginInput'].forEach(i=>$(i).value='');$('daysInput').value='1';
+    showToast('Guest checked in');await loadAll();
+  }catch(e){showToast(e.message,'error',6000)}finally{setLoading(false)}
+};
+window.checkoutGuest=async function(id){
+  if(!confirm('Check out this guest?'))return;
+  const g=guests.find(x=>String(x.id)===String(id));if(!g)return;
+  setLoading(true);
+  try{
+    const{error:e1}=await supabase.from('guests').update({still_lodging:false,check_out:today()}).eq('id',g.id);if(e1)throw e1;
+    if(g.room_id){const{error:e2}=await supabase.from('rooms').update({is_occupied:false}).eq('id',g.room_id);if(e2)throw e2}
+    showToast('Guest checked out');await loadAll();
+  }catch(e){showToast(e.message,'error')}finally{setLoading(false)}
+};
+window.markAllCheckedOut=async function(){
+  const a=guests.filter(g=>g.still_lodging);
+  if(!a.length)return showToast('No active guests.','error');
+  if(!confirm(`Check out all ${a.length} guest(s)?`))return;
+  setLoading(true);
+  try{
+    const{error:e1}=await supabase.from('guests').update({still_lodging:false,check_out:today()}).eq('still_lodging',true);if(e1)throw e1;
+    const{error:e2}=await supabase.from('rooms').update({is_occupied:false}).eq('is_occupied',true);if(e2)throw e2;
+    showToast('All guests checked out');await loadAll();
+  }catch(e){showToast(e.message,'error')}finally{setLoading(false)}
+};
+
+document.addEventListener('DOMContentLoaded',()=>{
+  supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  $('checkInDate').value=today();calculateTotal();
+  $('addGuestBtn').addEventListener('click',addGuest);
+  ['loginUser','loginPass'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()}));
+  setLoginRole('staff');
+});
+</script>
+</body>
+</html>
