@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lavevars Lodge · Kasama</title>
+<title>Sinamu Lodge · Kasama</title>
 <link rel="icon" type="image/jpeg" href="LadyB%20logo.jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -160,11 +160,11 @@ body.is-admin th.admin-only,body.is-admin td.admin-only{display:table-cell}
 <div class="login-screen" id="loginScreen">
   <div class="login-art">
     <div class="rule"></div>
-    <h1>Lavevars Lodge</h1>
+    <h1>Sinamu Lodge</h1>
     <p>Check-ins, rooms, prices and daily takings for Kasama, in one place.</p>
   </div>
   <div class="login-pane"><div class="login-box">
-    <img src="LadyB%20logo.jpeg" alt="Lavevars Lodge logo">
+    <img src="LadyB%20logo.jpeg" alt="Sinamu Lodge logo">
     <h2>Welcome back</h2>
     <p id="loginSubtitle">Sign in to the staff portal</p>
     <div class="lg" id="usernameGroup"><label for="loginUser">Username</label><input type="text" id="loginUser" placeholder="Enter username" autocomplete="username"></div>
@@ -182,7 +182,7 @@ body.is-admin th.admin-only,body.is-admin td.admin-only{display:table-cell}
 <nav class="sidebar">
   <div class="brand">
     <div class="brand-logo"><img src="LadyB%20logo.jpeg" alt=""></div>
-    <div><h1>Lavevars</h1><p>Kasama Lodge</p></div>
+    <div><h1>Sinamu</h1><p>Kasama Lodge</p></div>
   </div>
   <div class="nav-menu">
     <button class="nav-item active" onclick="switchView('dashboard',this)"><i class="fas fa-border-all"></i> Dashboard</button>
@@ -571,7 +571,7 @@ window.addStaff=async function(){
 };
 
 // Receipts & reports
-function receiptText(g){return `*Lavevars Lodge - Receipt*\n\nGuest: ${g.name}\nRoom: ${roomName(g.room_id)}\nCheck-in: ${g.check_in}\nNights: ${g.days||1}\nTotal paid: ${zmw(g.amount_paid)}\n\nThank you for staying with us!`}
+function receiptText(g){return `*Sinamu Lodge - Receipt*\n\nGuest: ${g.name}\nRoom: ${roomName(g.room_id)}\nCheck-in: ${g.check_in}\nNights: ${g.days||1}\nTotal paid: ${zmw(g.amount_paid)}\n\nThank you for staying with us!`}
 window.sendReceiptWhatsApp=function(id){
   const g=guests.find(x=>String(x.id)===String(id));if(!g)return;
   let p=(g.phone||'').replace(/\D/g,'');if(p.startsWith('0')&&p.length===10)p='260'+p.slice(1);
@@ -579,19 +579,19 @@ window.sendReceiptWhatsApp=function(id){
 };
 window.sendReceiptEmail=function(id){
   const g=guests.find(x=>String(x.id)===String(id));if(!g)return;
-  location.href=`mailto:${g.email||''}?subject=${encodeURIComponent('Receipt from Lavevars Lodge - '+g.name)}&body=${encodeURIComponent(receiptText(g).replace(/\*/g,''))}`;
+  location.href=`mailto:${g.email||''}?subject=${encodeURIComponent('Receipt from Sinamu Lodge - '+g.name)}&body=${encodeURIComponent(receiptText(g).replace(/\*/g,''))}`;
 };
 function stats(){return{total:guests.reduce((s,g)=>s+(Number(g.amount_paid)||0),0),active:guests.filter(g=>g.still_lodging).length,vacant:rooms.filter(r=>!r.is_occupied).length}}
 window.printReport=function(){
   const s=stats(),rows=guests.map(g=>`<tr><td>${escapeHtml(g.check_in)}</td><td>${escapeHtml(g.name)}</td><td>${escapeHtml(roomName(g.room_id))}</td><td>${g.days||1}</td><td>${zmw(g.amount_paid)}</td></tr>`).join('');
   const f=document.createElement('iframe');f.style.cssText='position:fixed;width:0;height:0;right:0;bottom:0';document.body.appendChild(f);
   const d=f.contentWindow.document;d.open();
-  d.write(`<html><head><title>Report - Lavevars Lodge</title><style>body{font-family:Arial,sans-serif;padding:40px}h1{text-align:center;border-bottom:3px solid #0F3D3E;padding-bottom:10px;color:#0F3D3E}.s{display:flex;justify-content:space-between;margin:24px 0;font-weight:bold}table{width:100%;border-collapse:collapse}th{background:#0F3D3E;color:#fff}th,td{border:1px solid #999;padding:9px;text-align:left}</style></head><body><h1>Lavevars Lodge - Management Report</h1><p style="text-align:center">Generated ${new Date().toLocaleString()}</p><div class="s"><div>Total revenue: ${zmw(s.total)}</div><div>Active guests: ${s.active}</div><div>Vacant rooms: ${s.vacant} / ${rooms.length}</div></div><table><thead><tr><th>Date</th><th>Guest</th><th>Room</th><th>Nights</th><th>Amount</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
+  d.write(`<html><head><title>Report - Sinamu Lodge</title><style>body{font-family:Arial,sans-serif;padding:40px}h1{text-align:center;border-bottom:3px solid #0F3D3E;padding-bottom:10px;color:#0F3D3E}.s{display:flex;justify-content:space-between;margin:24px 0;font-weight:bold}table{width:100%;border-collapse:collapse}th{background:#0F3D3E;color:#fff}th,td{border:1px solid #999;padding:9px;text-align:left}</style></head><body><h1>Sinamu Lodge - Management Report</h1><p style="text-align:center">Generated ${new Date().toLocaleString()}</p><div class="s"><div>Total revenue: ${zmw(s.total)}</div><div>Active guests: ${s.active}</div><div>Vacant rooms: ${s.vacant} / ${rooms.length}</div></div><table><thead><tr><th>Date</th><th>Guest</th><th>Room</th><th>Nights</th><th>Amount</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
   d.close();setTimeout(()=>{f.contentWindow.print();setTimeout(()=>f.remove(),1000)},500);
 };
 window.shareToWhatsApp=function(){
   const s=stats();
-  window.open('https://wa.me/?text='+encodeURIComponent(`*Lavevars Lodge - Management Report*\nDate: ${new Date().toLocaleDateString()}\n\n*Total revenue:* ${zmw(s.total)}\n*Active guests:* ${s.active}\n*Vacant rooms:* ${s.vacant} / ${rooms.length}`),'_blank');
+  window.open('https://wa.me/?text='+encodeURIComponent(`*Sinamu Lodge - Management Report*\nDate: ${new Date().toLocaleDateString()}\n\n*Total revenue:* ${zmw(s.total)}\n*Active guests:* ${s.active}\n*Vacant rooms:* ${s.vacant} / ${rooms.length}`),'_blank');
 };
 
 // Actions
